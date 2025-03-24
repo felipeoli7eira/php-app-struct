@@ -1,0 +1,24 @@
+version: '3'
+
+vars:
+  CONTAINER: php83-apache2
+
+tasks:
+  build:
+    aliases: [b]
+    cmds:
+      - docker compose up -d --build
+      - task: perm
+    desc: 'Build the container'
+
+  install_dependencies:
+    aliases: [dep]
+    cmds:
+      - docker exec -it {{.CONTAINER}} composer install
+    desc: 'Install dependencies'
+
+  permissions:
+    aliases: [perm]
+    cmds:
+      - docker exec -t {{.CONTAINER}} chown -R ${UID}:${GID} /var/www/html
+    desc: 'Fix permissions'

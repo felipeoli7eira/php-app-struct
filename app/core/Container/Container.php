@@ -1,0 +1,54 @@
+<?php
+
+namespace Core\Container;
+
+use Closure;
+use DomainException;
+use ReflectionClass;
+use ReflectionMethod;
+
+class Container
+{
+    private array $bindings = [];
+
+    public function bind(string $key, mixed $value)
+    {
+        $this->bindings[$key] = $value;
+    }
+
+    public function get(string $key)
+    {
+        if (array_key_exists($key, $this->bindings) && $this->bindings[$key] instanceof Closure) {
+            return $this->bindings[$key]();
+        }
+
+        if (class_exists($key)) {
+            return $this->resolveClassInstance($key);
+        }
+
+        return $this->bindings[$key];
+    }
+
+    private function resolveClassInstance(string $object)
+    {
+        $reflection = new ReflectionClass($object);
+
+        $constructor = $reflection->getConstructor();
+
+        if (is_null($constructor)) {
+            return new $object();
+        }
+
+        return $reflection->newInstanceArgs($this->resolveMethodParameters($constructor));
+    }
+
+    public function resolveMethodParameters(ReflectionMethod $method): array
+    {
+        $resolvedDependencies = array_map(
+            fn($param) => $this->get($param->getType()->getName()),
+            $method->getParameters()
+        );
+
+        return $resolvedDependencies;
+    }
+}
