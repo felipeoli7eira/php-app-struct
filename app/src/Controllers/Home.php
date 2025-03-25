@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Interfaces\UserRepositoryInterface;
-use App\Library\Auth;
 
 class Home
 {
-    public function __construct(private readonly Auth $auth) {}
+    public function __construct() {}
 
     public function index(UserRepositoryInterface $userRepository): void
     {
-        dd($userRepository->findById(1), $this->auth->auth());
+
+        var_dump($userRepository->findById(1));
     }
 }

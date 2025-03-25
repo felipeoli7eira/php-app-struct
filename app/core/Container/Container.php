@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Container;
 
 use Closure;
-use DomainException;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -14,6 +15,23 @@ class Container
     public function bind(string $key, mixed $value)
     {
         $this->bindings[$key] = $value;
+    }
+
+    public function mapDependenciesFrom(string|array $bindings): void
+    {
+        if (is_array($bindings) && sizeof($bindings)) {
+            foreach ($bindings as $key => $value) {
+                $this->bind($key, $value);
+            }
+
+            return;
+        }
+
+        $filePath = ROOT_PATH . DIRECTORY_SEPARATOR . $bindings;
+
+        if (file_exists($filePath) && is_file($filePath) && is_readable($filePath)) {
+            $this->bindings = require $filePath;
+        }
     }
 
     public function get(string $key)

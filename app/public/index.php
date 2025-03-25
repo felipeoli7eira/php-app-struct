@@ -1,22 +1,11 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+declare(strict_types=1);
 
-use App\Controllers\Home;
-use App\Interfaces\UserRepositoryInterface;
-use App\Library\Auth;
-use Core\Application\Application;
-use Core\Container\Container;
+require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/bootstrap.php';
+
 use Core\Router\Router;
 
-$routes = require __DIR__ . '/../src/routes/web.php';
-
-$container = new Container();
-Application::installContainer($container);
-
-$container->bind(UserRepositoryInterface::class, fn() => new App\Repositories\UserRepository());
-
-$container->get(Home::class);
-
 $router = new Router($container);
-$router->run($routes);
+$router->run(require __DIR__ . '/../src/routes/web.php');
